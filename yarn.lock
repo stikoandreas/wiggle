@@ -1741,6 +1741,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dom-mediacapture-transform@npm:^0.1.11":
+  version: 0.1.11
+  resolution: "@types/dom-mediacapture-transform@npm:0.1.11"
+  dependencies:
+    "@types/dom-webcodecs": "npm:*"
+  checksum: 10c0/19c76d54cf31aa2a925011fc5f973dff9a10bdecfdf2285e5e568e61850a0fa2b8c9f1807a1462cbefd57ec26d32eeaa9c359117aca9d9fe7f0d6f2fff33f51e
+  languageName: node
+  linkType: hard
+
+"@types/dom-webcodecs@npm:*":
+  version: 0.1.17
+  resolution: "@types/dom-webcodecs@npm:0.1.17"
+  checksum: 10c0/634eb548c009178e5b77ee568a020c3730d1a6bfaff0c9d413be37c1f8ca324a1df5084a5dcea3631b9926ceacd847d9340594d9fdcbe5bd173ea3e3f003248a
+  languageName: node
+  linkType: hard
+
+"@types/dom-webcodecs@npm:0.1.13":
+  version: 0.1.13
+  resolution: "@types/dom-webcodecs@npm:0.1.13"
+  checksum: 10c0/16683fd0330fdfbb867affec1c18fd493d88433a4ec66257579adc5d07b07e9492268b4401e9017b7388b13750722365b0392b375e39c84e74f564d5b4f634a4
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:1.0.8":
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
@@ -5563,6 +5586,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mediabunny@npm:^1.25.0":
+  version: 1.25.0
+  resolution: "mediabunny@npm:1.25.0"
+  dependencies:
+    "@types/dom-mediacapture-transform": "npm:^0.1.11"
+    "@types/dom-webcodecs": "npm:0.1.13"
+  checksum: 10c0/0981b19f21cebb18a5f9b5d31b56d2a9d293063fd220a4be325afa1b0bded4da44c8d2dc968bc5adc31b5629c79cc8ee791ec17b85cc901c4c2fd9fffe71b322
+  languageName: node
+  linkType: hard
+
 "meow@npm:^13.2.0":
   version: 13.2.0
   resolution: "meow@npm:13.2.0"
@@ -8460,6 +8493,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.5"
     identity-obj-proxy: "npm:^3.0.0"
     jsdom: "npm:^27.0.0"
+    mediabunny: "npm:^1.25.0"
     postcss: "npm:^8.5.6"
     postcss-preset-mantine: "npm:1.18.0"
     postcss-simple-vars: "npm:^7.0.1"
