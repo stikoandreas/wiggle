@@ -1,4 +1,6 @@
-# Mantine Vite template
+# Wiggle
+
+Web app for wigglegram generation.
 
 ## Features
 
