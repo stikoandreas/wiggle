@@ -17,7 +17,7 @@ export function HomePage() {
           <Image key={index} src={renderImage(image)} />
         ))}
       </SimpleGrid>
-      <Renderer />
+      <Renderer images={images} frameRate={2}></Renderer>
       <ColorSchemeToggle />
     </>
   );

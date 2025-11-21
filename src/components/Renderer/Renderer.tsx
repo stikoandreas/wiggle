@@ -9,12 +9,18 @@ import {
 } from 'mediabunny';
 import { Button, Loader, Progress } from '@mantine/core';
 
+function getImageNumber(images: number, frame: number) {
+  return frame % images;
+}
+
 export function Renderer({
   duration = 5,
   frameRate = 60,
+  images,
 }: {
   duration?: number;
   frameRate?: number;
+  images: HTMLImageElement[];
 }) {
   const output = useRef<Output | null>(null);
   const renderCanvas = useRef<OffscreenCanvas>(new OffscreenCanvas(1280, 720));
@@ -52,7 +58,7 @@ export function Renderer({
       setIsRendering(true);
 
       // Function to update the scene based on the current time
-      const updateScene = (time: number) => {
+      const updateScene = (frame: number) => {
         const width = canvas.width;
         const height = canvas.height;
 
@@ -60,14 +66,13 @@ export function Renderer({
         context.fillStyle = 'black';
         context.fillRect(0, 0, width, height);
 
-        // Draw a moving rectangle
-        const rectWidth = 100;
-        const rectHeight = 100;
-        const x = ((time * 100) % (width + rectWidth)) - rectWidth;
-        const y = height / 2 - rectHeight / 2;
+        console.log('Frame', frame);
+        console.log('Image', getImageNumber(images.length, frame));
 
-        context.fillStyle = 'red';
-        context.fillRect(x, y, rectWidth, rectHeight);
+        // Draw the right image
+        const image = images[getImageNumber(images.length, frame)];
+        console.log(image);
+        context.drawImage(image, 0, 0);
       };
 
       const totalFrames = duration * frameRate;
@@ -110,7 +115,7 @@ export function Renderer({
         console.log(`Rendering frame ${currentFrame + 1} / ${totalFrames}`);
 
         // Update the scene
-        updateScene(currentTime);
+        updateScene(currentFrame);
 
         renderProgress.current = currentFrame / totalFrames;
 
