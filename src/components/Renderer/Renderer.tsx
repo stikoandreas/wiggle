@@ -9,14 +9,18 @@ import {
 } from 'mediabunny';
 import { Button, Loader, Progress } from '@mantine/core';
 
-export function Renderer({ duration = 5 }: { duration?: number }) {
+export function Renderer({
+  duration = 5,
+  frameRate = 60,
+}: {
+  duration?: number;
+  frameRate?: number;
+}) {
   const output = useRef<Output | null>(null);
   const renderCanvas = useRef<OffscreenCanvas>(new OffscreenCanvas(1280, 720));
   const renderCtx = useRef<OffscreenCanvasRenderingContext2D>(
     renderCanvas.current.getContext('2d') as OffscreenCanvasRenderingContext2D
   );
-
-  const frameRate = 60;
 
   const renderProgress = useRef<number>(0);
 
