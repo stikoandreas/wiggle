@@ -17,10 +17,12 @@ export function Renderer({
   duration = 5,
   frameRate = 60,
   images,
+  onComplete,
 }: {
   duration?: number;
   frameRate?: number;
   images: HTMLImageElement[];
+  onComplete?: (videoBlob: Blob) => void;
 }) {
   const output = useRef<Output | null>(null);
   const renderCanvas = useRef<OffscreenCanvas>(new OffscreenCanvas(1280, 720));
@@ -139,6 +141,7 @@ export function Renderer({
 
       //resultVideo.src = URL.createObjectURL(videoBlob);
       setVideoSrc(URL.createObjectURL(videoBlob));
+      onComplete && onComplete(videoBlob);
       //void resultVideo.play();
 
       const fileSizeMiB = (videoBlob.size / (1024 * 1024)).toPrecision(3);
