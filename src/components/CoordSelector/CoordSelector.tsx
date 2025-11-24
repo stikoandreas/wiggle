@@ -1,5 +1,5 @@
-import { memo, useMemo } from 'react';
-import { Center, Image, SimpleGrid } from '@mantine/core';
+import { memo, useMemo, useState } from 'react';
+import { AspectRatio, Center, Group, Image, SimpleGrid, UnstyledButton } from '@mantine/core';
 import { renderImage } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
@@ -11,18 +11,37 @@ export const CoordSelectorGrid = memo(
     images: HTMLImageElement[];
     coords: { x: number; y: number; w: number; h: number }[];
     onChange: (index: number, coord: { x: number; y: number; w: number; h: number }) => void;
-  }) => (
-    <SimpleGrid cols={3}>
-      {images.map((image, index) => (
-        <CoordSelector
-          key={index}
-          coords={coords[index]}
-          image={image}
-          onSelect={(newCoords) => onChange(index, newCoords)}
-        />
-      ))}
-    </SimpleGrid>
-  )
+  }) => {
+    const [currentImage, setCurrentImage] = useState<number>(0);
+    return (
+      <>
+        <AspectRatio ratio={Math.min(...coords.map((coord) => coord.w / coord.h))} mah="80dvh">
+          <CoordSelector
+            image={images[currentImage]}
+            coords={coords[currentImage]}
+            onSelect={(newCoords) => onChange(currentImage, newCoords)}
+          />
+        </AspectRatio>
+        <Group justify="center" mt="xs">
+          {images.map((_, index) => (
+            <UnstyledButton>
+              <Image
+                src={renderImage(images[index], 0.2)}
+                style={{
+                  border: index === currentImage ? '2px solid white' : '2px solid transparent',
+                  borderRadius: '4px',
+                  width: '120px',
+                  height: '120px',
+                  objectFit: 'cover',
+                }}
+                onClick={() => setCurrentImage(index)}
+              />
+            </UnstyledButton>
+          ))}
+        </Group>
+      </>
+    );
+  }
 );
 
 function CoordSelector({
@@ -41,7 +60,7 @@ function CoordSelector({
   const invertedCursor = true;
 
   return (
-    <Center>
+    <Center mah="80dvh">
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <Image
           src={imageSrc}
@@ -51,6 +70,7 @@ function CoordSelector({
             const y = ((e.clientY - rect.top) / rect.height) * image.height;
             onSelect({ x, y, w: image.width, h: image.height });
           }}
+          mah={'80dvh'}
           style={{
             //cursor: `url(${renderCursor(image)}) 20 20, pointer`,
             cursor: 'crosshair',
