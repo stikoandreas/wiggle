@@ -1,42 +1,39 @@
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
 import { AspectRatio, Box, Center, Group, Image, UnstyledButton } from '@mantine/core';
-import { renderImage, renderThumbnail } from '@/components/ImageInput/ImageInput';
+import { renderThumbnail, WiggleImage } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
   ({
     images,
-    coords,
     onChange,
   }: {
-    images: HTMLImageElement[];
-    coords: { x: number; y: number; w: number; h: number }[];
-    onChange: (index: number, coord: { x: number; y: number; w: number; h: number }) => void;
+    images: WiggleImage[];
+    onChange: (index: number, newImage: WiggleImage) => void;
   }) => {
     const [currentImage, setCurrentImage] = useState<number>(0);
     return (
       <Box style={{ overflow: 'hidden' }}>
-        <AspectRatio ratio={Math.min(...coords.map((coord) => coord.w / coord.h))} mah="80dvh">
+        <AspectRatio ratio={Math.min(...images.map((image) => image.w / image.h))} mah="80dvh">
           <CoordSelector
             image={images[currentImage]}
-            coords={coords[currentImage]}
-            onSelect={(newCoords) => onChange(currentImage, newCoords)}
+            onSelect={(newImage) => onChange(currentImage, newImage)}
           />
         </AspectRatio>
         <Group justify="center" mt="xs">
-          {images.map((_, index) => (
+          {images.map((image, index) => (
             <UnstyledButton key={index} style={{ zIndex: 1000 }}>
               <Image
                 src={
-                  coords[index].x && coords[index].y
-                    ? renderThumbnail(images[index], 120, coords[index].x, coords[index].y)
-                    : renderImage(images[index], 0.2)
+                  image.x && image.y
+                    ? renderThumbnail(image.image, 120, image.x, image.y)
+                    : image.src
                 }
                 style={{
                   border:
                     index === currentImage
                       ? '2px solid white'
-                      : coords[index].x && coords[index].y
+                      : image.x && image.y
                         ? '2px solid var(--mantine-primary-color-6)'
                         : '2px solid transparent',
                   width: '120px',
@@ -55,18 +52,14 @@ export const CoordSelectorGrid = memo(
 
 function CoordSelector({
   image,
-  coords,
   onSelect,
 }: {
-  image: HTMLImageElement;
-  coords: { x: number; y: number; w: number; h: number };
-  onSelect: (coords: { x: number; y: number; w: number; h: number }) => void;
+  image: WiggleImage;
+  onSelect: (newImage: WiggleImage) => void;
 }) {
   // Click on image to select image pixel coordinates, based on the image itself
 
   const mouseCoords = useRef<{ x: number; y: number } | null>(null);
-
-  const imageSrc = useMemo(() => renderImage(image), [image]);
 
   const invertedCursor = true;
 
@@ -85,25 +78,25 @@ function CoordSelector({
               }
             }
             const rect = (e.target as HTMLImageElement).getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * image.width;
-            const y = ((e.clientY - rect.top) / rect.height) * image.height;
-            onSelect({ x, y, w: image.width, h: image.height });
+            const x = ((e.clientX - rect.left) / rect.width) * image.w;
+            const y = ((e.clientY - rect.top) / rect.height) * image.h;
+            onSelect({ ...image, x, y });
             mouseCoords.current = null;
           }}
         >
           <Image
-            src={imageSrc}
+            src={image.src}
             mah="80dvh"
             style={{
               //cursor: `url(${renderCursor(image)}) 20 20, pointer`,
               cursor: 'crosshair',
             }}
           />
-          {coords.x > 0 &&
-            coords.y > 0 &&
+          {image.x &&
+            image.y &&
             (invertedCursor ? (
               <Image
-                src={imageSrc}
+                src={image.src}
                 onClick={(e) => {
                   e.preventDefault();
                 }}
@@ -113,15 +106,15 @@ function CoordSelector({
                   top: 0,
                   left: 0,
                   pointerEvents: 'none',
-                  maskImage: `radial-gradient(circle 4px at ${(coords.x / coords.w) * 100}%  ${(coords.y / coords.h) * 100}%, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)`,
+                  maskImage: `radial-gradient(circle 4px at ${(image.x / image.w) * 100}%  ${(image.y / image.h) * 100}%, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)`,
                 }}
               />
             ) : (
               <div
                 style={{
                   position: 'absolute',
-                  left: `calc(${(coords.x / coords.w) * 100}%)`,
-                  top: `calc(${(coords.y / coords.h) * 100}%)`,
+                  left: `calc(${(image.x / image.w) * 100}%)`,
+                  top: `calc(${(image.y / image.h) * 100}%)`,
                   width: '8px',
                   height: '8px',
                   backgroundColor: 'red',

@@ -10,6 +10,7 @@ import {
 } from 'mediabunny';
 import { PercentCrop } from 'react-image-crop';
 import { Button, Center, Loader, Modal, Progress } from '@mantine/core';
+import { WiggleImage } from '../ImageInput/ImageInput';
 import { useImagePlacer } from '../StillRenderer/StillRenderer';
 
 export function getImageNumber(images: number, frame: number) {
@@ -21,15 +22,13 @@ export function getImageNumber(images: number, frame: number) {
 export function Renderer({
   duration = 5,
   frameRate = 60,
-  coords,
   images,
   onComplete,
   crop,
 }: {
   duration?: number;
   frameRate?: number;
-  coords: { x: number; y: number; w: number; h: number }[];
-  images: HTMLImageElement[];
+  images: WiggleImage[];
   onComplete?: (videoBlob: Blob) => void;
   crop?: PercentCrop;
 }) {
@@ -49,7 +48,7 @@ export function Renderer({
 
   const [description, setDescription] = useState<string>('');
 
-  const { width, height, position } = useImagePlacer(coords, 0.5, 0.1, crop);
+  const { width, height, position } = useImagePlacer(images, 0.5, 0.1, crop);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -88,7 +87,7 @@ export function Renderer({
 
         // Draw the right image
         const image = images[imageIndex];
-        context.drawImage(image, ...position(imageIndex, crop));
+        context.drawImage(image.image, ...position(imageIndex, crop));
       };
 
       const totalFrames = duration * frameRate;
