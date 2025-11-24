@@ -85,7 +85,7 @@ export const StillRenderer = memo(
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
 
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 1 / images.length;
 
       // Draw each image at its specified coordinates
       images.forEach((image, index) => {

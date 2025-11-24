@@ -3,7 +3,7 @@ import { Title } from '@mantine/core';
 export function Welcome() {
   return (
     <>
-      <Title ta="center" mt={100}>
+      <Title ta="center" mt="lg">
         Wiggle Wiggler
       </Title>
     </>
