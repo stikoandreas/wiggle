@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Crop, PercentCrop } from 'react-image-crop';
 
 export function roundToEven(value: number): number {
@@ -53,44 +53,46 @@ export function useImagePlacer(
   };
 }
 
-export function StillRenderer({
-  images,
-  imageCoords,
-}: {
-  images: HTMLImageElement[];
-  imageCoords: { x: number; y: number; w: number; h: number }[];
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export const StillRenderer = memo(
+  ({
+    images,
+    imageCoords,
+  }: {
+    images: HTMLImageElement[];
+    imageCoords: { x: number; y: number; w: number; h: number }[];
+  }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { width, height, position } = useImagePlacer(imageCoords, 0.5, 0.1);
-  useEffect(() => {
-    if (images.length === 0) {
-      return;
-    }
-    if (!canvasRef.current) {
-      return;
-    }
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-    canvas.width = width;
-    canvas.height = height;
+    const { width, height, position } = useImagePlacer(imageCoords, 0.5, 0.1);
+    useEffect(() => {
+      if (images.length === 0) {
+        return;
+      }
+      if (!canvasRef.current) {
+        return;
+      }
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return;
+      }
+      canvas.width = width;
+      canvas.height = height;
 
-    // Clear the canvas
-    ctx.clearRect(0, 0, width, height);
+      // Clear the canvas
+      ctx.clearRect(0, 0, width, height);
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, width, height);
 
-    ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.5;
 
-    // Draw each image at its specified coordinates
-    images.forEach((image, index) => {
-      ctx.drawImage(image, ...position(index));
-    });
-  }, [images, imageCoords]);
+      // Draw each image at its specified coordinates
+      images.forEach((image, index) => {
+        ctx.drawImage(image, ...position(index));
+      });
+    }, [images, imageCoords]);
 
-  return <canvas ref={canvasRef} style={{ width: '100%' }} />;
-}
+    return <canvas ref={canvasRef} style={{ width: '100%' }} />;
+  }
+);
