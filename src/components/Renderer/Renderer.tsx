@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BufferTarget,
   CanvasSource,
@@ -8,19 +8,24 @@ import {
   QUALITY_HIGH,
 } from 'mediabunny';
 import { Button, Loader, Progress } from '@mantine/core';
+import { useImagePlacer } from '../StillRenderer/StillRenderer';
 
-function getImageNumber(images: number, frame: number) {
-  return frame % images;
+export function getImageNumber(images: number, frame: number) {
+  const cycle_length = (images - 1) * 2;
+  const cycle_frame = frame % cycle_length;
+  return cycle_frame < images ? cycle_frame : cycle_length - cycle_frame;
 }
 
 export function Renderer({
   duration = 5,
   frameRate = 60,
+  coords,
   images,
   onComplete,
 }: {
   duration?: number;
   frameRate?: number;
+  coords: { x: number; y: number; w: number; h: number }[];
   images: HTMLImageElement[];
   onComplete?: (videoBlob: Blob) => void;
 }) {
@@ -40,6 +45,10 @@ export function Renderer({
 
   const [description, setDescription] = useState<string>('');
 
+  const { width, height, position } = useImagePlacer(coords, 0.5, 0.1);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
     let renderTick: NodeJS.Timeout | undefined = undefined;
     if (isRendering) {
@@ -56,6 +65,9 @@ export function Renderer({
   const generateVideo = async () => {
     const canvas = renderCanvas.current;
     const context = renderCtx.current;
+
+    canvas.width = width;
+    canvas.height = height;
     try {
       setIsRendering(true);
 
@@ -68,13 +80,11 @@ export function Renderer({
         context.fillStyle = 'black';
         context.fillRect(0, 0, width, height);
 
-        console.log('Frame', frame);
-        console.log('Image', getImageNumber(images.length, frame));
+        const imageIndex = getImageNumber(images.length, frame);
 
         // Draw the right image
-        const image = images[getImageNumber(images.length, frame)];
-        console.log(image);
-        context.drawImage(image, 0, 0);
+        const image = images[imageIndex];
+        context.drawImage(image, ...position(imageIndex));
       };
 
       const totalFrames = duration * frameRate;
@@ -114,8 +124,6 @@ export function Renderer({
       for (currentFrame; currentFrame < totalFrames; currentFrame++) {
         const currentTime = currentFrame / frameRate;
 
-        console.log(`Rendering frame ${currentFrame + 1} / ${totalFrames}`);
-
         // Update the scene
         updateScene(currentFrame);
 
@@ -145,7 +153,8 @@ export function Renderer({
       //void resultVideo.play();
 
       const fileSizeMiB = (videoBlob.size / (1024 * 1024)).toPrecision(3);
-      setDescription(`File size: ${fileSizeMiB} MiB`);
+      setDescription(`File size: ${fileSizeMiB} MiB.`);
+      renderProgress.current = 1;
     } catch (error) {
       console.error(error);
 
@@ -171,13 +180,17 @@ export function Renderer({
       {videoSrc && (
         <video
           id="result-video"
+          ref={videoRef}
           style={{ width: '100%', maxWidth: '640px', marginTop: '20px' }}
           controls
           muted
+          loop
           src={videoSrc || undefined}
-        ></video>
+        />
       )}
       {description && <p>{description}</p>}
+      {videoRef.current && <p>{videoRef.current?.videoWidth}</p>}
+      {videoRef.current && <p>{videoRef.current?.videoHeight}</p>}
     </>
   );
 }

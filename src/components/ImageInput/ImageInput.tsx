@@ -1,22 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
-import { IconBorderCorners, IconDownload, IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
-import {
-  Box,
-  Button,
-  Card,
-  Center,
-  Container,
-  Group,
-  Image as Img,
-  Loader,
-  LoadingOverlay,
-  Paper,
-  SimpleGrid,
-  Text,
-  Title,
-} from '@mantine/core';
+import { useState } from 'react';
+import { IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
+import { Box, Group, LoadingOverlay, Text } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { useOs, useScrollIntoView } from '@mantine/hooks';
+import { useOs } from '@mantine/hooks';
 
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -31,7 +17,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
-export function renderImage(image: HTMLImageElement): string {
+export function renderImage(image: HTMLImageElement, scale = 0.5): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
@@ -39,9 +25,27 @@ export function renderImage(image: HTMLImageElement): string {
     throw new Error('Could not get canvas context');
   }
 
-  canvas.width = image.width;
-  canvas.height = image.height;
-  ctx.drawImage(image, 0, 0);
+  canvas.width = image.width * scale;
+  canvas.height = image.height * scale;
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL('image/png');
+}
+
+export function renderCursor(image: HTMLImageElement): string {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
+
+  canvas.width = 60;
+  canvas.height = 60;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 0.7;
+  ctx.drawImage(image, 0, 0, 60, 60);
 
   return canvas.toDataURL('image/png');
 }
