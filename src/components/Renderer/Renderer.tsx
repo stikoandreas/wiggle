@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { IconDownload } from '@tabler/icons-react';
 import {
   BufferTarget,
   CanvasSource,
@@ -8,7 +9,7 @@ import {
   QUALITY_HIGH,
 } from 'mediabunny';
 import { PercentCrop } from 'react-image-crop';
-import { Button, Loader, Progress } from '@mantine/core';
+import { Button, Center, Loader, Modal, Progress } from '@mantine/core';
 import { useImagePlacer } from '../StillRenderer/StillRenderer';
 
 export function getImageNumber(images: number, frame: number) {
@@ -169,6 +170,18 @@ export function Renderer({
       setProgress(0);
     }
   };
+
+  const shareData = useCallback(async () => {
+    if (!videoSrc) {
+      return;
+    }
+    const blob = await (await fetch(videoSrc)).blob();
+
+    return {
+      files: [new File([blob], `wigglegram.mp4`, { type: 'video/mp4' })],
+    };
+  }, [videoSrc]);
+
   return (
     <>
       <Button
@@ -180,20 +193,29 @@ export function Renderer({
         Generate Video
       </Button>
       <Progress mt="md" value={progress * 100} transitionDuration={0} />
-      {videoSrc && (
-        <video
-          id="result-video"
-          ref={videoRef}
-          style={{ width: '100%', maxWidth: '640px', marginTop: '20px' }}
-          controls
-          muted
-          loop
-          src={videoSrc || undefined}
-        />
-      )}
-      {description && <p>{description}</p>}
-      {videoRef.current && <p>{videoRef.current?.videoWidth}</p>}
-      {videoRef.current && <p>{videoRef.current?.videoHeight}</p>}
+      <Modal opened={!!videoSrc} onClose={() => setVideoSrc(null)} title="Wigglegram!" size="lg">
+        <Center>
+          <video
+            id="result-video"
+            ref={videoRef}
+            style={{ width: '100%', maxWidth: '640px', marginTop: '20px' }}
+            controls
+            muted
+            loop
+            src={videoSrc || undefined}
+          />
+        </Center>
+        {description && <p>{description}</p>}
+        {'canShare' in navigator && images.length > 0 && (
+          <Button
+            leftSection={<IconDownload size={16} />}
+            fullWidth
+            onClick={async () => navigator.share(await shareData())}
+          >
+            Share / Save to Camera Roll
+          </Button>
+        )}
+      </Modal>
     </>
   );
 }
