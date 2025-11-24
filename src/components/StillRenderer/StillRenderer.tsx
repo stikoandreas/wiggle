@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Crop, PercentCrop } from 'react-image-crop';
 
 export function roundToEven(value: number): number {
   return 2 * Math.round(value / 2);
@@ -7,24 +8,39 @@ export function roundToEven(value: number): number {
 export function useImagePlacer(
   imageCoords: { x: number; y: number; w: number; h: number }[],
   scale_factor: number = 0.1,
-  padding = 0
+  padding = 0,
+  crop?: PercentCrop
 ) {
   const x_origin = Math.max(...imageCoords.map((coord) => coord.x));
   const y_origin = Math.max(...imageCoords.map((coord) => coord.y));
 
+  // Determine the natural width and height needed to fit all images
   const natural_width = Math.max(...imageCoords.map((coord) => coord.w + x_origin - coord.x));
   const natural_height = Math.max(...imageCoords.map((coord) => coord.h + y_origin - coord.y));
 
-  const padding_width = natural_width * padding;
-  const padding_height = natural_height * padding;
+  // Determine padding in pixels
+  const x_padding = natural_width * padding;
+  const y_padding = natural_height * padding;
 
-  const width = roundToEven((natural_width + padding_width * 2) * scale_factor);
-  const height = roundToEven((natural_height + padding_height * 2) * scale_factor);
+  // Determine padded canvas size
+  const padded_width = natural_width + x_padding * 2;
+  const padded_height = natural_height + y_padding * 2;
 
-  function position(coordIndex: number): [number, number, number, number] {
+  // Determine cropped size
+  const cropped_width = (padded_width * (crop?.width || 100)) / 100;
+  const cropped_height = (padded_height * (crop?.height || 100)) / 100;
+
+  // Round to even numbers for mp4 encoding
+  const width = roundToEven(cropped_width * scale_factor);
+  const height = roundToEven(cropped_height * scale_factor);
+
+  function position(coordIndex: number, crop?: Crop): [number, number, number, number] {
+    const x_crop_offset = (padded_width * (crop?.x || 0)) / 100;
+    const y_crop_offset = (padded_height * (crop?.y || 0)) / 100;
+
     return [
-      (x_origin - imageCoords[coordIndex].x + padding_width) * scale_factor,
-      (y_origin - imageCoords[coordIndex].y + padding_height) * scale_factor,
+      (x_origin - imageCoords[coordIndex].x + x_padding - x_crop_offset) * scale_factor,
+      (y_origin - imageCoords[coordIndex].y + y_padding - y_crop_offset) * scale_factor,
       imageCoords[coordIndex].w * scale_factor,
       imageCoords[coordIndex].h * scale_factor,
     ];
@@ -76,5 +92,5 @@ export function StillRenderer({
     });
   }, [images, imageCoords]);
 
-  return <canvas ref={canvasRef} style={{ border: '1px solid black', width: '50%' }} />;
+  return <canvas ref={canvasRef} style={{ width: '100%' }} />;
 }

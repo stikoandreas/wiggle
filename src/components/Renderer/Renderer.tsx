@@ -7,6 +7,7 @@ import {
   Output,
   QUALITY_HIGH,
 } from 'mediabunny';
+import { PercentCrop } from 'react-image-crop';
 import { Button, Loader, Progress } from '@mantine/core';
 import { useImagePlacer } from '../StillRenderer/StillRenderer';
 
@@ -22,12 +23,14 @@ export function Renderer({
   coords,
   images,
   onComplete,
+  crop,
 }: {
   duration?: number;
   frameRate?: number;
   coords: { x: number; y: number; w: number; h: number }[];
   images: HTMLImageElement[];
   onComplete?: (videoBlob: Blob) => void;
+  crop?: PercentCrop;
 }) {
   const output = useRef<Output | null>(null);
   const renderCanvas = useRef<OffscreenCanvas>(new OffscreenCanvas(1280, 720));
@@ -45,7 +48,7 @@ export function Renderer({
 
   const [description, setDescription] = useState<string>('');
 
-  const { width, height, position } = useImagePlacer(coords, 0.5, 0.1);
+  const { width, height, position } = useImagePlacer(coords, 0.5, 0.1, crop);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -84,7 +87,7 @@ export function Renderer({
 
         // Draw the right image
         const image = images[imageIndex];
-        context.drawImage(image, ...position(imageIndex));
+        context.drawImage(image, ...position(imageIndex, crop));
       };
 
       const totalFrames = duration * frameRate;

@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/dropzone/styles.css';
+import 'react-image-crop/dist/ReactCrop.css';
 
 import { MantineProvider } from '@mantine/core';
 import { Router } from './Router';

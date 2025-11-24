@@ -6451,6 +6451,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-image-crop@npm:^11.0.10":
+  version: 11.0.10
+  resolution: "react-image-crop@npm:11.0.10"
+  peerDependencies:
+    react: ">=16.13.1"
+  checksum: 10c0/2c2c7066c3a51838fc074a4a125ee2063170e01c26e3b1c8fc8b66155cf7ef576b5747089b4f365ce9dd2728794c39f57643b37eb78116e9db3f4b6299d3f682
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -8571,6 +8580,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
+    react-image-crop: "npm:^11.0.10"
     react-router-dom: "npm:^7.9.4"
     storybook: "npm:^10.0.0"
     stylelint: "npm:^16.25.0"

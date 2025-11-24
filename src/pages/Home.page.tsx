@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import ReactCrop, { PercentCrop } from 'react-image-crop';
 import { Center, Image, SimpleGrid } from '@mantine/core';
 import { useListState } from '@mantine/hooks';
 import { ImageInput, renderImage } from '@/components/ImageInput/ImageInput';
@@ -75,6 +76,7 @@ function CoordSelector({
 
 export function HomePage() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const defaultCrop = { unit: '%', x: 10, y: 10, width: 80, height: 80 } as PercentCrop;
 
   const [coords, { setItem, setState }] = useListState<{
     x: number;
@@ -86,6 +88,16 @@ export function HomePage() {
   function handleSetImages(newImages: HTMLImageElement[]) {
     setImages(newImages);
     setState(newImages.map((image) => ({ x: 0, y: 0, w: image.width, h: image.height })));
+    setCrop(defaultCrop);
+  }
+
+  const [crop, setCrop] = useState<PercentCrop>(defaultCrop);
+
+  function validateCrop(crop: PercentCrop) {
+    if (crop.width > 0 && crop.height > 1) {
+      return crop;
+    }
+    return undefined;
   }
 
   return (
@@ -102,8 +114,16 @@ export function HomePage() {
           />
         ))}
       </SimpleGrid>
-      <StillRenderer images={images} imageCoords={coords} />
-      <Renderer images={images} frameRate={10} coords={coords} />
+      <ReactCrop
+        crop={crop}
+        onChange={(_, percentCrop) => setCrop(percentCrop)}
+        style={{ width: '50%' }}
+        minHeight={10}
+        minWidth={10}
+      >
+        <StillRenderer images={images} imageCoords={coords} />
+      </ReactCrop>
+      <Renderer images={images} frameRate={10} coords={coords} crop={validateCrop(crop)} />
       <ColorSchemeToggle />
     </>
   );
