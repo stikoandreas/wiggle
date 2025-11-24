@@ -4,32 +4,32 @@ import { Box, Group, LoadingOverlay, Text } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useOs } from '@mantine/hooks';
 
-function loadImage(file: File): Promise<HTMLImageElement> {
+export type WiggleImage = {
+  image: HTMLImageElement;
+  src: string;
+  w: number;
+  h: number;
+  x?: number;
+  y?: number;
+};
+
+function loadImage(file: File): Promise<WiggleImage> {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.src = URL.createObjectURL(file);
+    const src = URL.createObjectURL(file);
+    image.src = src;
     image.onload = () => {
-      resolve(image);
+      resolve({
+        image,
+        src,
+        w: image.width,
+        h: image.height,
+      });
     };
     image.onerror = (err) => {
       reject(err);
     };
   });
-}
-
-export function renderImage(image: HTMLImageElement, scale = 0.5): string {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    throw new Error('Could not get canvas context');
-  }
-
-  canvas.width = image.width * scale;
-  canvas.height = image.height * scale;
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-  return canvas.toDataURL('image/png');
 }
 
 export function renderThumbnail(
@@ -62,7 +62,7 @@ export function renderThumbnail(
   return canvas.toDataURL('image/png');
 }
 
-export function ImageInput({ onChange }: { onChange: (images: HTMLImageElement[]) => void }) {
+export function ImageInput({ onChange }: { onChange: (images: WiggleImage[]) => void }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const os = useOs();
