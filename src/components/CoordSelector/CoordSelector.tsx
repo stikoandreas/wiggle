@@ -1,5 +1,5 @@
 import { memo, useMemo, useState } from 'react';
-import { AspectRatio, Center, Group, Image, SimpleGrid, UnstyledButton } from '@mantine/core';
+import { AspectRatio, Center, Group, Image, UnstyledButton } from '@mantine/core';
 import { renderImage, renderThumbnail } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
@@ -78,7 +78,7 @@ function CoordSelector({
             const y = ((e.clientY - rect.top) / rect.height) * image.height;
             onSelect({ x, y, w: image.width, h: image.height });
           }}
-          mah={'80dvh'}
+          mah="80dvh"
           style={{
             //cursor: `url(${renderCursor(image)}) 20 20, pointer`,
             cursor: 'crosshair',
