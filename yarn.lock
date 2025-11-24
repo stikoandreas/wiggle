@@ -1022,18 +1022,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gfazioli/mantine-split-pane@npm:^2.5.3":
-  version: 2.5.3
-  resolution: "@gfazioli/mantine-split-pane@npm:2.5.3"
-  peerDependencies:
-    "@mantine/core": ">=7.0.0"
-    "@mantine/hooks": ">=7.0.0"
-    react: ^18.x || ^19.x
-    react-dom: ^18.x || ^19.x
-  checksum: 10c0/6af68c73eab7cd9748906b119ad175064484ea8c1bab18f4b005a875d6ea8d10b75a02ed6fb8a526ac446faee2d97011fbd339b4687679f189796bd26aedc3b3
-  languageName: node
-  linkType: hard
-
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -6538,6 +6526,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-resizable-panels@npm:^3.0.6":
+  version: 3.0.6
+  resolution: "react-resizable-panels@npm:3.0.6"
+  peerDependencies:
+    react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/e6a6a2a7f438aaf3d4411c39626c1cab5c23af6f25d5ff1fdb8446916388fec549be63d65c47fe17bcc82522b1b5fc7fffa77a550ca9d0b8d21e340d83bdb3c0
+  languageName: node
+  linkType: hard
+
 "react-router-dom@npm:^7.9.4":
   version: 7.9.6
   resolution: "react-router-dom@npm:7.9.6"
@@ -8562,7 +8560,6 @@ __metadata:
   resolution: "wiggle-app@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.37.0"
-    "@gfazioli/mantine-split-pane": "npm:^2.5.3"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.7.0"
     "@mantine/core": "npm:8.3.8"
     "@mantine/dropzone": "npm:^8.3.8"
@@ -8594,6 +8591,7 @@ __metadata:
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-image-crop: "npm:^11.0.10"
+    react-resizable-panels: "npm:^3.0.6"
     react-router-dom: "npm:^7.9.4"
     storybook: "npm:^10.0.0"
     stylelint: "npm:^16.25.0"

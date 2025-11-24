@@ -93,6 +93,6 @@ export const StillRenderer = memo(
       });
     }, [images, imageCoords]);
 
-    return <canvas ref={canvasRef} style={{ width: '100%' }} />;
+    return <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />;
   }
 );

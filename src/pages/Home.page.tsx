@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Split } from '@gfazioli/mantine-split-pane';
+import { useCallback, useState } from 'react';
+import { IconDotsVertical } from '@tabler/icons-react';
 import ReactCrop, { PercentCrop } from 'react-image-crop';
-import { Center, Container, Image, Stack } from '@mantine/core';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Box, Center, Container, Stack } from '@mantine/core';
 import { useListState } from '@mantine/hooks';
 import { CoordSelectorGrid } from '@/components/CoordSelector/CoordSelector';
-import { ImageInput, renderImage } from '@/components/ImageInput/ImageInput';
+import { ImageInput } from '@/components/ImageInput/ImageInput';
 import { Renderer } from '@/components/Renderer/Renderer';
 import { StillRenderer } from '@/components/StillRenderer/StillRenderer';
 import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
@@ -46,25 +47,38 @@ export function HomePage() {
           <ImageInput onChange={handleSetImages} />
         </Container>
       ) : (
-        <Split orientation="vertical" mt="lg">
-          <Split.Pane initialWidth="50%">
-            <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
-          </Split.Pane>
-          <Split.Resizer />
-          <Split.Pane initialWidth="50%">
-            <Stack align="center" gap="md" justify="space-between">
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                minHeight={10}
-                minWidth={10}
-              >
-                <StillRenderer images={images} imageCoords={coords} />
-              </ReactCrop>
-              <Renderer images={images} frameRate={10} coords={coords} crop={validateCrop(crop)} />
-            </Stack>
-          </Split.Pane>
-        </Split>
+        <Box mt="lg">
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={50}>
+              <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
+            </Panel>
+            <PanelResizeHandle>
+              <Center h="100%" c="dimmed">
+                <IconDotsVertical size={16} />
+              </Center>
+            </PanelResizeHandle>
+            <Panel defaultSize={50}>
+              <Stack gap="md" justify="space-between">
+                <Center mah="80vh">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(_, percentCrop) => setCrop(percentCrop)}
+                    minHeight={10}
+                    minWidth={10}
+                  >
+                    <StillRenderer images={images} imageCoords={coords} />
+                  </ReactCrop>
+                </Center>
+                <Renderer
+                  images={images}
+                  frameRate={10}
+                  coords={coords}
+                  crop={validateCrop(crop)}
+                />
+              </Stack>
+            </Panel>
+          </PanelGroup>
+        </Box>
       )}
       <ColorSchemeToggle />
     </>
