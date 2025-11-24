@@ -32,7 +32,12 @@ export function renderImage(image: HTMLImageElement, scale = 0.5): string {
   return canvas.toDataURL('image/png');
 }
 
-export function renderCursor(image: HTMLImageElement): string {
+export function renderThumbnail(
+  image: HTMLImageElement,
+  size: number,
+  x: number,
+  y: number
+): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
@@ -40,12 +45,19 @@ export function renderCursor(image: HTMLImageElement): string {
     throw new Error('Could not get canvas context');
   }
 
-  canvas.width = 60;
-  canvas.height = 60;
+  canvas.width = size;
+  canvas.height = size;
+  ctx.globalAlpha = 1.0;
+  ctx.drawImage(image, x - size / 2, y - size / 2, size, size, 0, 0, size, size);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 0.7;
-  ctx.drawImage(image, 0, 0, 60, 60);
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(size / 2 - 10, size / 2);
+  ctx.lineTo(size / 2 + 10, size / 2);
+  ctx.moveTo(size / 2, size / 2 - 10);
+  ctx.lineTo(size / 2, size / 2 + 10);
+  ctx.stroke();
 
   return canvas.toDataURL('image/png');
 }
