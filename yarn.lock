@@ -4171,7 +4171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@npm:~2.3.2, fsevents@npm:~2.3.3":
+"fsevents@npm:*, fsevents@npm:~2.3.2, fsevents@npm:~2.3.3":
   version: 2.3.3
   resolution: "fsevents@npm:2.3.3"
   dependencies:
@@ -4181,7 +4181,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@npm%3A~2.3.2#optional!builtin<compat/fsevents>, fsevents@patch:fsevents@npm%3A~2.3.3#optional!builtin<compat/fsevents>":
+"fsevents@patch:fsevents@npm%3A*#optional!builtin<compat/fsevents>, fsevents@patch:fsevents@npm%3A~2.3.2#optional!builtin<compat/fsevents>, fsevents@patch:fsevents@npm%3A~2.3.3#optional!builtin<compat/fsevents>":
   version: 2.3.3
   resolution: "fsevents@patch:fsevents@npm%3A2.3.3#optional!builtin<compat/fsevents>::version=2.3.3&hash=df0bf1"
   dependencies:
@@ -6484,6 +6484,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-prismazoom@npm:^3.3.5":
+  version: 3.3.5
+  resolution: "react-prismazoom@npm:3.3.5"
+  dependencies:
+    fsevents: "npm:*"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  checksum: 10c0/448df5d91706368097239c22cfd28e1018670cc7a41e9532735631527877303f261d86b76cc2e25433d281bd4564ce47db2fe9b89c0c4aee4b495c49c87e07ac
+  languageName: node
+  linkType: hard
+
 "react-refresh@npm:^0.18.0":
   version: 0.18.0
   resolution: "react-refresh@npm:0.18.0"
@@ -8591,6 +8606,7 @@ __metadata:
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-image-crop: "npm:^11.0.10"
+    react-prismazoom: "npm:^3.3.5"
     react-resizable-panels: "npm:^3.0.6"
     react-router-dom: "npm:^7.9.4"
     storybook: "npm:^10.0.0"
