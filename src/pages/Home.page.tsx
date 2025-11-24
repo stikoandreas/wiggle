@@ -47,38 +47,56 @@ export function HomePage() {
           <ImageInput onChange={handleSetImages} />
         </Container>
       ) : (
-        <Box mt="lg">
-          <PanelGroup direction="horizontal">
-            <Panel defaultSize={50}>
-              <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
-            </Panel>
-            <PanelResizeHandle>
-              <Center h="100%" c="dimmed">
-                <IconDotsVertical size={16} />
-              </Center>
-            </PanelResizeHandle>
-            <Panel defaultSize={50}>
-              <Stack gap="md" justify="space-between">
-                <Center mah="80vh">
-                  <ReactCrop
-                    crop={crop}
-                    onChange={(_, percentCrop) => setCrop(percentCrop)}
-                    minHeight={10}
-                    minWidth={10}
-                  >
-                    <StillRenderer images={images} imageCoords={coords} />
-                  </ReactCrop>
+        <>
+          <Box mt="lg" visibleFrom="md">
+            <PanelGroup direction="horizontal">
+              <Panel defaultSize={50}>
+                <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
+              </Panel>
+              <PanelResizeHandle>
+                <Center h="100%" c="dimmed">
+                  <IconDotsVertical size={16} />
                 </Center>
-                <Renderer
-                  images={images}
-                  frameRate={10}
-                  coords={coords}
-                  crop={validateCrop(crop)}
-                />
-              </Stack>
-            </Panel>
-          </PanelGroup>
-        </Box>
+              </PanelResizeHandle>
+              <Panel defaultSize={50}>
+                <Stack gap="md" justify="space-between">
+                  <Center mah="80vh">
+                    <ReactCrop
+                      crop={crop}
+                      onChange={(_, percentCrop) => setCrop(percentCrop)}
+                      minHeight={10}
+                      minWidth={10}
+                    >
+                      <StillRenderer images={images} imageCoords={coords} />
+                    </ReactCrop>
+                  </Center>
+                  <Renderer
+                    images={images}
+                    frameRate={10}
+                    coords={coords}
+                    crop={validateCrop(crop)}
+                  />
+                </Stack>
+              </Panel>
+            </PanelGroup>
+          </Box>
+          <Box m="lg" hiddenFrom="md">
+            <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
+            <Stack gap="md" justify="space-between" mt="lg">
+              <Center mah="80vh">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  minHeight={10}
+                  minWidth={10}
+                >
+                  <StillRenderer images={images} imageCoords={coords} />
+                </ReactCrop>
+              </Center>
+              <Renderer images={images} frameRate={10} coords={coords} crop={validateCrop(crop)} />
+            </Stack>
+          </Box>
+        </>
       )}
       <ColorSchemeToggle />
     </>

@@ -1,6 +1,6 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
-import { AspectRatio, Center, Group, Image, UnstyledButton } from '@mantine/core';
+import { AspectRatio, Box, Center, Group, Image, UnstyledButton } from '@mantine/core';
 import { renderImage, renderThumbnail } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
@@ -15,7 +15,7 @@ export const CoordSelectorGrid = memo(
   }) => {
     const [currentImage, setCurrentImage] = useState<number>(0);
     return (
-      <>
+      <Box style={{ overflow: 'hidden' }}>
         <AspectRatio ratio={Math.min(...coords.map((coord) => coord.w / coord.h))} mah="80dvh">
           <CoordSelector
             image={images[currentImage]}
@@ -48,7 +48,7 @@ export const CoordSelectorGrid = memo(
             </UnstyledButton>
           ))}
         </Group>
-      </>
+      </Box>
     );
   }
 );
