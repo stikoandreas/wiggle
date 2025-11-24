@@ -42,16 +42,20 @@ export function HomePage() {
       <Welcome />
       <ImageInput onChange={handleSetImages} />
       <CoordSelectorGrid images={images} coords={coords} onChange={setItemMemoized} />
-      <ReactCrop
-        crop={crop}
-        onChange={(_, percentCrop) => setCrop(percentCrop)}
-        style={{ width: '50%' }}
-        minHeight={10}
-        minWidth={10}
-      >
-        <StillRenderer images={images} imageCoords={coords} />
-      </ReactCrop>
-      <Renderer images={images} frameRate={10} coords={coords} crop={validateCrop(crop)} />
+      {images.length > 0 && (
+        <>
+          <ReactCrop
+            crop={crop}
+            onChange={(_, percentCrop) => setCrop(percentCrop)}
+            style={{ width: '50%' }}
+            minHeight={10}
+            minWidth={10}
+          >
+            <StillRenderer images={images} imageCoords={coords} />
+          </ReactCrop>
+          <Renderer images={images} frameRate={10} coords={coords} crop={validateCrop(crop)} />
+        </>
+      )}
       <ColorSchemeToggle />
     </>
   );
