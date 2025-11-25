@@ -22,7 +22,7 @@ export const CoordSelectorGrid = memo(
         </AspectRatio>
         <Group justify="center" mt="xs">
           {images.map((image, index) => (
-            <UnstyledButton key={index} style={{ zIndex: 1000 }}>
+            <UnstyledButton key={index} style={{ zIndex: 1 }}>
               <Image
                 src={
                   image.x && image.y

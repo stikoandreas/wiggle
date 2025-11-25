@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { IconDotsVertical } from '@tabler/icons-react';
 import ReactCrop, { PercentCrop } from 'react-image-crop';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { Box, Center, Container, Stack } from '@mantine/core';
+import { Box, Center, Container, Slider, Stack, Text } from '@mantine/core';
 import { useListState } from '@mantine/hooks';
 import { CoordSelectorGrid } from '@/components/CoordSelector/CoordSelector';
 import { ImageInput, WiggleImage } from '@/components/ImageInput/ImageInput';
@@ -14,6 +14,8 @@ import { Welcome } from '../components/Welcome/Welcome';
 export function HomePage() {
   const [images, { setItem, setState }] = useListState<WiggleImage>([]);
   const defaultCrop = { unit: '%', x: 10, y: 10, width: 80, height: 80 } as PercentCrop;
+
+  const [scale, setScale] = useState<number>(0.5);
 
   function handleSetImages(newImages: WiggleImage[]) {
     setState(newImages);
@@ -59,10 +61,31 @@ export function HomePage() {
                       minHeight={10}
                       minWidth={10}
                     >
-                      <StillRenderer images={images} />
+                      <StillRenderer images={images} scale={scale} />
                     </ReactCrop>
                   </Center>
-                  <Renderer images={images} frameRate={10} crop={validateCrop(crop)} />
+                  <Box mx="xl">
+                    <Text size="sm">Scale</Text>
+                    <Slider
+                      min={0.25}
+                      max={1}
+                      step={0.25}
+                      value={scale}
+                      onChange={setScale}
+                      marks={[
+                        { value: 0.25, label: 'x0.25' },
+                        { value: 0.5, label: 'x0.5' },
+                        { value: 0.75, label: 'x0.75' },
+                        { value: 1, label: 'x1' },
+                      ]}
+                    />
+                  </Box>
+                  <Renderer
+                    images={images}
+                    frameRate={10}
+                    crop={validateCrop(crop)}
+                    scale={scale}
+                  />
                 </Stack>
               </Panel>
             </PanelGroup>
@@ -74,13 +97,13 @@ export function HomePage() {
                 <ReactCrop
                   crop={crop}
                   onChange={(_, percentCrop) => setCrop(percentCrop)}
-                  minHeight={10}
-                  minWidth={10}
+                  minHeight={50}
+                  minWidth={50}
                 >
-                  <StillRenderer images={images} />
+                  <StillRenderer images={images} scale={scale} />
                 </ReactCrop>
               </Center>
-              <Renderer images={images} frameRate={10} crop={validateCrop(crop)} />
+              <Renderer images={images} frameRate={10} crop={validateCrop(crop)} scale={scale} />
             </Stack>
           </Box>
         </>
