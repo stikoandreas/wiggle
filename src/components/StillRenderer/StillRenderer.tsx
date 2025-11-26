@@ -62,10 +62,10 @@ export function useImagePlacer(
   };
 }
 
-export const StillRenderer = memo(({ images }: { images: WiggleImage[] }) => {
+export const StillRenderer = memo(({ images, scale }: { images: WiggleImage[]; scale: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { width, height, position } = useImagePlacer(images, 0.5, 0.1);
+  const { width, height, position } = useImagePlacer(images, scale, 0.1);
   useEffect(() => {
     if (images.length === 0) {
       return;
@@ -93,7 +93,7 @@ export const StillRenderer = memo(({ images }: { images: WiggleImage[] }) => {
     images.forEach((image, index) => {
       ctx.drawImage(image.image, ...position(index));
     });
-  }, [images]);
+  }, [images, scale]);
 
   return <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />;
 });

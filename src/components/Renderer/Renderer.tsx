@@ -25,12 +25,14 @@ export function Renderer({
   images,
   onComplete,
   crop,
+  scale,
 }: {
   duration?: number;
   frameRate?: number;
   images: WiggleImage[];
   onComplete?: (videoBlob: Blob) => void;
   crop?: PercentCrop;
+  scale: number;
 }) {
   const output = useRef<Output | null>(null);
   const renderCanvas = useRef<OffscreenCanvas>(new OffscreenCanvas(1280, 720));
@@ -48,7 +50,7 @@ export function Renderer({
 
   const [description, setDescription] = useState<string>('');
 
-  const { width, height, position } = useImagePlacer(images, 0.5, 0.1, crop);
+  const { width, height, position } = useImagePlacer(images, scale, 0.1, crop);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -197,7 +199,7 @@ export function Renderer({
           <video
             id="result-video"
             ref={videoRef}
-            style={{ width: '100%', maxWidth: '640px', marginTop: '20px' }}
+            style={{ width: '100%', maxWidth: '640px', marginTop: '20px', maxHeight: '50dvh' }}
             controls
             muted
             loop
