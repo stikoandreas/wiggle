@@ -61,7 +61,7 @@ export function HomePage() {
                       minHeight={10}
                       minWidth={10}
                     >
-                      <StillRenderer images={images} scale={scale} />
+                      <StillRenderer images={images} scale={0.5} />
                     </ReactCrop>
                   </Center>
                   <Box mx="xl">
@@ -100,9 +100,25 @@ export function HomePage() {
                   minHeight={50}
                   minWidth={50}
                 >
-                  <StillRenderer images={images} scale={scale} />
+                  <StillRenderer images={images} scale={0.5} />
                 </ReactCrop>
               </Center>
+              <Box mx="xl">
+                <Text size="sm">Scale</Text>
+                <Slider
+                  min={0.25}
+                  max={1}
+                  step={0.25}
+                  value={scale}
+                  onChange={setScale}
+                  marks={[
+                    { value: 0.25, label: 'x0.25' },
+                    { value: 0.5, label: 'x0.5' },
+                    { value: 0.75, label: 'x0.75' },
+                    { value: 1, label: 'x1' },
+                  ]}
+                />
+              </Box>
               <Renderer images={images} frameRate={10} crop={validateCrop(crop)} scale={scale} />
             </Stack>
           </Box>

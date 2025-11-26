@@ -199,7 +199,7 @@ export function Renderer({
           <video
             id="result-video"
             ref={videoRef}
-            style={{ width: '100%', maxWidth: '640px', marginTop: '20px' }}
+            style={{ width: '100%', maxWidth: '640px', marginTop: '20px', maxHeight: '50dvh' }}
             controls
             muted
             loop

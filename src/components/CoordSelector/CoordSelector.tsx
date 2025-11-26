@@ -1,6 +1,6 @@
 import { memo, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
-import { AspectRatio, Box, Center, Group, Image, UnstyledButton } from '@mantine/core';
+import { AspectRatio, Box, Center, Group, Image, rem, UnstyledButton } from '@mantine/core';
 import { renderThumbnail, WiggleImage } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
@@ -20,7 +20,7 @@ export const CoordSelectorGrid = memo(
             onSelect={(newImage) => onChange(currentImage, newImage)}
           />
         </AspectRatio>
-        <Group justify="center" mt="xs">
+        <Group justify="center" mt="xs" gap={4}>
           {images.map((image, index) => (
             <UnstyledButton key={index} style={{ zIndex: 1 }}>
               <Image
@@ -36,9 +36,9 @@ export const CoordSelectorGrid = memo(
                       : image.x && image.y
                         ? '2px solid var(--mantine-primary-color-6)'
                         : '2px solid transparent',
-                  width: '120px',
-                  height: '120px',
+                  height: `min(120px, calc(100vw / ${images.length} - ${images.length + 1} * 0.25rem * var(--mantine-scale)))`,
                   objectFit: 'cover',
+                  width: `min(120px, calc(100vw / ${images.length} - ${images.length + 1} * 0.25rem * var(--mantine-scale)))`,
                 }}
                 onClick={() => setCurrentImage(index)}
               />
@@ -61,7 +61,7 @@ function CoordSelector({
 
   const mouseCoords = useRef<{ x: number; y: number } | null>(null);
 
-  const invertedCursor = true;
+  const invertedCursor = false;
 
   return (
     <Center mah="80dvh">
@@ -110,19 +110,20 @@ function CoordSelector({
                 }}
               />
             ) : (
-              <div
+              <svg
+                width="8"
+                height="8"
                 style={{
                   position: 'absolute',
                   left: `calc(${(image.x / image.w) * 100}%)`,
                   top: `calc(${(image.y / image.h) * 100}%)`,
-                  width: '8px',
-                  height: '8px',
-                  backgroundColor: 'red',
-                  borderRadius: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  transform: 'translate(-50%,-50%)',
                   pointerEvents: 'none',
                 }}
-              />
+              >
+                <path d="M 0 4 H 9" stroke="white" strokeWidth={0.5} />
+                <path d="M 4 0 V 9" stroke="white" strokeWidth={0.5} />
+              </svg>
             ))}
         </UnstyledButton>
       </PrismaZoom>
