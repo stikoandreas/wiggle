@@ -4,7 +4,7 @@ export function Welcome() {
   return (
     <>
       <Title ta="center" mt="lg">
-        Wiggle Maker
+        Wiggle Studio
       </Title>
     </>
   );
