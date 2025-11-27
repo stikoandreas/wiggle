@@ -156,7 +156,6 @@ export function HomePage() {
           </Box>
         </>
       )}
-      <ColorSchemeToggle />
     </>
   );
 }
