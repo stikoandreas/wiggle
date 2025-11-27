@@ -1,6 +1,6 @@
 import { memo, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
-import { AspectRatio, Box, Center, Group, Image, rem, UnstyledButton } from '@mantine/core';
+import { AspectRatio, Box, Center, Group, Image, Text, UnstyledButton } from '@mantine/core';
 import { renderThumbnail, WiggleImage } from '@/components/ImageInput/ImageInput';
 
 export const CoordSelectorGrid = memo(
@@ -12,8 +12,27 @@ export const CoordSelectorGrid = memo(
     onChange: (index: number, newImage: WiggleImage) => void;
   }) => {
     const [currentImage, setCurrentImage] = useState<number>(0);
+    const selectedImages = images.filter((image) => image.x && image.y);
     return (
-      <Box style={{ overflow: 'hidden' }}>
+      <Box style={{ overflow: 'hidden', position: 'relative' }}>
+        {selectedImages.length < images.length && (
+          <Box
+            style={{
+              position: 'absolute',
+              zIndex: 2,
+              top: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              width: '100%',
+              textAlign: 'center',
+            }}
+            p={4}
+          >
+            <Text size="sm">Zoom and select the same point on all {images.length} images.</Text>
+            <Text size="sm">
+              ({selectedImages.length}/{images.length} selected)
+            </Text>
+          </Box>
+        )}
         <AspectRatio ratio={Math.min(...images.map((image) => image.w / image.h))} mah="80dvh">
           <CoordSelector
             image={images[currentImage]}
@@ -61,7 +80,7 @@ function CoordSelector({
 
   const mouseCoords = useRef<{ x: number; y: number } | null>(null);
 
-  const invertedCursor = false;
+  const invertedCursor = true;
 
   return (
     <Center mah="80dvh">

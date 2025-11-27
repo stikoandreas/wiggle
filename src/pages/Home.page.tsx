@@ -31,6 +31,8 @@ export function HomePage() {
     return undefined;
   }
 
+  const selectedImages = images.filter((image) => image.x && image.y);
+
   const setItemMemoized = useCallback(setItem, []);
 
   return (
@@ -54,7 +56,22 @@ export function HomePage() {
               </PanelResizeHandle>
               <Panel defaultSize={50}>
                 <Stack gap="md" justify="space-between">
-                  <Center mah="80vh">
+                  <Center mah="80vh" style={{ position: 'relative' }}>
+                    {selectedImages.length === images.length && (
+                      <Box
+                        style={{
+                          position: 'absolute',
+                          zIndex: 1,
+                          top: 0,
+                          backgroundColor: 'rgba(0,0,0,0.5)',
+                          width: '100%',
+                          textAlign: 'center',
+                        }}
+                        p={4}
+                      >
+                        <Text size="sm">Crop your image to size.</Text>
+                      </Box>
+                    )}
                     <ReactCrop
                       crop={crop}
                       onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -93,7 +110,22 @@ export function HomePage() {
           <Box m="lg" hiddenFrom="md">
             <CoordSelectorGrid images={images} onChange={setItemMemoized} />
             <Stack gap="md" justify="space-between" mt="lg">
-              <Center mah="80vh">
+              <Center mah="80vh" style={{ position: 'relative' }}>
+                {selectedImages.length === images.length && (
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      zIndex: 1,
+                      top: 0,
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      width: '100%',
+                      textAlign: 'center',
+                    }}
+                    p={4}
+                  >
+                    <Text size="sm">Crop your image to size.</Text>
+                  </Box>
+                )}
                 <ReactCrop
                   crop={crop}
                   onChange={(_, percentCrop) => setCrop(percentCrop)}
