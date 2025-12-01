@@ -21,10 +21,11 @@ function getThresholdForLine(
   height: number,
   threshold: number
 ) {
+  let count = 0;
   for (let y = 0; y < height; y += 1) {
-    if (getThresholdForCoord(data, x, y, width, threshold)) return true;
+    if (getThresholdForCoord(data, x, y, width, threshold)) count += 1;
   }
-  return false;
+  return count / height > 0.1;
 }
 
 function binarize(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
@@ -90,7 +91,7 @@ function linearScan(line: boolean[], from: number, to: number) {
 export function Splitter({ image }: { image: WiggleImage }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [threshold, setThreshold] = useState<number>(20);
+  const [threshold, setThreshold] = useState<number>(25);
 
   const [breakPoints, setBreakPoints] = useState<[number, number][]>([]);
 
@@ -152,7 +153,7 @@ export function Splitter({ image }: { image: WiggleImage }) {
         </PrismaZoom>
       </Box>
       <Slider min={1} max={255} value={threshold} onChange={setThreshold} />
-      <SimpleGrid cols={4}>
+      <SimpleGrid cols={4} bg="white">
         {breakPoints.map((breakPoint) => (
           <Preview image={image} breakPoint={breakPoint} />
         ))}
