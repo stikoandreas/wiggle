@@ -7,8 +7,8 @@ import { useListState } from '@mantine/hooks';
 import { CoordSelectorGrid } from '@/components/CoordSelector/CoordSelector';
 import { ImageInput, WiggleImage } from '@/components/ImageInput/ImageInput';
 import { Renderer } from '@/components/Renderer/Renderer';
+import { Splitter } from '@/components/Splitter/Splitter';
 import { StillRenderer } from '@/components/StillRenderer/StillRenderer';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
 import { Welcome } from '../components/Welcome/Welcome';
 
 export function HomePage() {
@@ -41,6 +41,10 @@ export function HomePage() {
       {images.length === 0 ? (
         <Container mt="lg">
           <ImageInput onChange={handleSetImages} />
+        </Container>
+      ) : images.length === 1 ? (
+        <Container mt="lg">
+          <Splitter image={images[0]} />
         </Container>
       ) : (
         <>
