@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
 import { Box, SimpleGrid, Slider } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { WiggleImage } from '../ImageInput/ImageInput';
 
 function getThresholdForCoord(
@@ -25,7 +26,7 @@ function getThresholdForLine(
   for (let y = 0; y < height; y += 1) {
     if (getThresholdForCoord(data, x, y, width, threshold)) count += 1;
   }
-  return count / height > 0.1;
+  return count / height > 0.05;
 }
 
 function binarize(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
@@ -77,8 +78,8 @@ function linearScan(line: boolean[], from: number, to: number) {
 
   let found_something = false;
 
-  for (let i = 0; i < slice.length; i += 1) {
-    if (!slice[i]) {
+  for (let i = 0; i < slice.length - 1; i += 1) {
+    if (!slice[i - 1] && !slice[i] && !slice[i + 1]) {
       found_something = true;
       min_x = Math.min(min_x, from + i);
       max_x = Math.max(max_x, from + i);
@@ -95,64 +96,16 @@ export function Splitter({ image }: { image: WiggleImage }) {
 
   const [breakPoints, setBreakPoints] = useState<[number, number][]>([]);
 
-  useEffect(() => {
-    if (!canvasRef.current) {
-      return;
-    }
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-
-    const width = image.w;
-    const height = image.h;
-
-    canvas.width = image.w;
-    canvas.height = image.h;
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw each image at its specified coordinates
-    ctx.drawImage(image.image, 0, 0);
-    const line = bitMap(canvas, ctx, threshold);
-
-    const first_border = linearScan(line, width / 4 - width / 8, width / 4 + width / 8);
-    const second_border = linearScan(
-      line,
-      (width / 4) * 2 - width / 8,
-      (width / 4) * 2 + width / 8
-    );
-    const third_border = linearScan(line, (width / 4) * 3 - width / 8, (width / 4) * 3 + width / 8);
-
-    first_border && verticalLine(canvas, ctx, first_border, 'yellow');
-    second_border && verticalLine(canvas, ctx, second_border, 'yellow');
-    third_border && verticalLine(canvas, ctx, third_border, 'yellow');
-
-    if (first_border && second_border && third_border) {
-      setBreakPoints([
-        [0, first_border],
-        [first_border, second_border],
-        [second_border, third_border],
-        [third_border, canvas.width],
-      ]);
-    }
-
-    //binarize(canvas, ctx, threshold);
-  }, [image, threshold]);
+  const [debounced] = useDebouncedValue(threshold, 200);
 
   return (
     <>
       <Box style={{ overflow: 'hidden' }}>
         <PrismaZoom>
-          <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />
+          <SplitPreview image={image} threshold={debounced} onChange={setBreakPoints} />
         </PrismaZoom>
       </Box>
-      <Slider min={1} max={255} value={threshold} onChange={setThreshold} />
+      <Slider min={1} max={255 / 2} value={threshold} onChange={setThreshold} />
       <SimpleGrid cols={4} bg="white">
         {breakPoints.map((breakPoint) => (
           <Preview image={image} breakPoint={breakPoint} />
@@ -161,6 +114,80 @@ export function Splitter({ image }: { image: WiggleImage }) {
     </>
   );
 }
+
+export const SplitPreview = memo(
+  ({
+    image,
+    threshold,
+    onChange,
+  }: {
+    image: WiggleImage;
+    threshold: number;
+    onChange: (breakPoint: [number, number][]) => void;
+  }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+      if (!canvasRef.current) {
+        return;
+      }
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return;
+      }
+
+      const scale_factor = 0.5;
+
+      const width = image.w * scale_factor;
+      const height = image.h * scale_factor;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw each image at its specified coordinates
+      ctx.drawImage(image.image, 0, 0, canvas.width, canvas.height);
+      const line = bitMap(canvas, ctx, threshold);
+
+      const first_border = linearScan(line, width / 4 - width / 8, width / 4 + width / 8);
+      const second_border = linearScan(
+        line,
+        (width / 4) * 2 - width / 8,
+        (width / 4) * 2 + width / 8
+      );
+      const third_border = linearScan(
+        line,
+        (width / 4) * 3 - width / 8,
+        (width / 4) * 3 + width / 8
+      );
+
+      first_border && verticalLine(canvas, ctx, first_border, 'yellow');
+      second_border && verticalLine(canvas, ctx, second_border, 'yellow');
+      third_border && verticalLine(canvas, ctx, third_border, 'yellow');
+
+      if (first_border && second_border && third_border) {
+        onChange([
+          [0, first_border / scale_factor],
+          [first_border / scale_factor, second_border / scale_factor],
+          [second_border / scale_factor, third_border / scale_factor],
+          [third_border / scale_factor, canvas.width / scale_factor],
+        ]);
+      } else {
+        onChange([]);
+      }
+
+      //binarize(canvas, ctx, threshold);
+    }, [image, threshold]);
+
+    return <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />;
+  }
+);
 
 export function Preview({
   image,
