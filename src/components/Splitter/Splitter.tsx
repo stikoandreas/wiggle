@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Slider } from '@mantine/core';
+import PrismaZoom from 'react-prismazoom';
+import { Box, SimpleGrid, Slider } from '@mantine/core';
 import { WiggleImage } from '../ImageInput/ImageInput';
 
 function getThresholdForCoord(
@@ -83,13 +84,15 @@ function linearScan(line: boolean[], from: number, to: number) {
     }
   }
 
-  return found_something ? (min_x + max_x) / 2 : undefined;
+  return found_something ? Math.round((min_x + max_x) / 2) : undefined;
 }
 
 export function Splitter({ image }: { image: WiggleImage }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [threshold, setThreshold] = useState<number>(20);
+
+  const [breakPoints, setBreakPoints] = useState<[number, number][]>([]);
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -125,17 +128,73 @@ export function Splitter({ image }: { image: WiggleImage }) {
     );
     const third_border = linearScan(line, (width / 4) * 3 - width / 8, (width / 4) * 3 + width / 8);
 
-    first_border && verticalLine(canvas, ctx, first_border, 'green');
-    second_border && verticalLine(canvas, ctx, second_border, 'green');
-    third_border && verticalLine(canvas, ctx, third_border, 'green');
+    first_border && verticalLine(canvas, ctx, first_border, 'yellow');
+    second_border && verticalLine(canvas, ctx, second_border, 'yellow');
+    third_border && verticalLine(canvas, ctx, third_border, 'yellow');
+
+    if (first_border && second_border && third_border) {
+      setBreakPoints([
+        [0, first_border],
+        [first_border, second_border],
+        [second_border, third_border],
+        [third_border, canvas.width],
+      ]);
+    }
 
     //binarize(canvas, ctx, threshold);
   }, [image, threshold]);
 
   return (
     <>
-      <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />
+      <Box style={{ overflow: 'hidden' }}>
+        <PrismaZoom>
+          <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />
+        </PrismaZoom>
+      </Box>
       <Slider min={1} max={255} value={threshold} onChange={setThreshold} />
+      <SimpleGrid cols={4}>
+        {breakPoints.map((breakPoint) => (
+          <Preview image={image} breakPoint={breakPoint} />
+        ))}
+      </SimpleGrid>
     </>
   );
+}
+
+export function Preview({
+  image,
+  breakPoint,
+}: {
+  image: WiggleImage;
+  breakPoint: [number, number];
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    const width = breakPoint[1] - breakPoint[0];
+    const height = image.h;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw each image at its specified coordinates
+    ctx.drawImage(image.image, breakPoint[0], 0, width, height, 0, 0, width, height);
+  }, [image, breakPoint]);
+
+  return <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />;
 }
