@@ -45,18 +45,12 @@ function binarize(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, thre
   ctx.putImageData(imageData, 0, 0);
 }
 
-function getLine(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
+function bitMap(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
-  const newImageData = ctx.createImageData(canvas.width, 1);
-  for (let x = 0; x < canvas.width; x += 1) {
-    const value = getThresholdForLine(data, x, canvas.width, canvas.height, threshold) ? 255 : 0;
-    newImageData.data[x * 4] = value;
-    newImageData.data[x * 4 + 1] = value;
-    newImageData.data[x * 4 + 2] = value;
-    newImageData.data[x * 4 + 3] = 255;
-  }
-  ctx.putImageData(newImageData, 0, 0);
+  return new Array(canvas.width)
+    .fill(undefined)
+    .map((_, index) => getThresholdForLine(data, index, canvas.width, canvas.height, threshold));
 }
 
 function verticalLine(
@@ -73,24 +67,16 @@ function verticalLine(
   ctx.stroke(); // Render the path
 }
 
-function linearScan(
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
-  from: number,
-  to: number
-) {
-  const diff = to - from;
-
-  const imageData = ctx.getImageData(from, 0, diff, 1);
-  const data = imageData.data;
-
+function linearScan(line: boolean[], from: number, to: number) {
   let min_x = to;
   let max_x = from;
 
+  const slice = line.slice(from, to);
+
   let found_something = false;
 
-  for (let i = 0; i < diff; i += 1) {
-    if (data[i * 4] === 0) {
+  for (let i = 0; i < slice.length; i += 1) {
+    if (!slice[i]) {
       found_something = true;
       min_x = Math.min(min_x, from + i);
       max_x = Math.max(max_x, from + i);
@@ -129,21 +115,15 @@ export function Splitter({ image }: { image: WiggleImage }) {
 
     // Draw each image at its specified coordinates
     ctx.drawImage(image.image, 0, 0);
-    getLine(canvas, ctx, threshold);
+    const line = bitMap(canvas, ctx, threshold);
 
-    const first_border = linearScan(canvas, ctx, width / 4 - width / 8, width / 4 + width / 8);
+    const first_border = linearScan(line, width / 4 - width / 8, width / 4 + width / 8);
     const second_border = linearScan(
-      canvas,
-      ctx,
+      line,
       (width / 4) * 2 - width / 8,
       (width / 4) * 2 + width / 8
     );
-    const third_border = linearScan(
-      canvas,
-      ctx,
-      (width / 4) * 3 - width / 8,
-      (width / 4) * 3 + width / 8
-    );
+    const third_border = linearScan(line, (width / 4) * 3 - width / 8, (width / 4) * 3 + width / 8);
 
     first_border && verticalLine(canvas, ctx, first_border, 'green');
     second_border && verticalLine(canvas, ctx, second_border, 'green');
