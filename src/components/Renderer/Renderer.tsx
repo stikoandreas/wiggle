@@ -3,13 +3,24 @@ import { IconDownload } from '@tabler/icons-react';
 import {
   BufferTarget,
   CanvasSource,
+  getEncodableVideoCodecs,
   getFirstEncodableVideoCodec,
   Mp4OutputFormat,
   Output,
   QUALITY_HIGH,
+  VideoCodec,
 } from 'mediabunny';
 import { PercentCrop } from 'react-image-crop';
-import { Button, Center, Loader, Modal, Progress } from '@mantine/core';
+import {
+  Button,
+  Center,
+  Loader,
+  Modal,
+  Progress,
+  SegmentedControl,
+  Stack,
+  Text,
+} from '@mantine/core';
 import { WiggleImage } from '../ImageInput/ImageInput';
 import { useImagePlacer } from '../StillRenderer/StillRenderer';
 
@@ -54,6 +65,38 @@ export function Renderer({
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const [codec, setCodec] = useState<VideoCodec | undefined>(undefined);
+  const [codecs, setCodecs] = useState<VideoCodec[]>([]);
+
+  useEffect(() => {
+    async function getCodecs() {
+      output.current = new Output({
+        target: new BufferTarget(), // Stored in memory
+        format: new Mp4OutputFormat(),
+      });
+      const videoCodecs = await getEncodableVideoCodecs(
+        output.current.format.getSupportedVideoCodecs(),
+        {
+          width,
+          height,
+        }
+      );
+      const firstCodec = await getFirstEncodableVideoCodec(
+        output.current.format.getSupportedVideoCodecs(),
+        {
+          width,
+          height,
+        }
+      );
+      if (!videoCodecs || !firstCodec) {
+        throw new Error("Your browser doesn't support video encoding.");
+      }
+      setCodec(videoCodecs.includes('av1') ? 'av1' : firstCodec);
+      setCodecs(videoCodecs);
+    }
+    getCodecs();
+  }, []);
+
   useEffect(() => {
     let renderTick: NodeJS.Timeout | undefined = undefined;
     if (isRendering) {
@@ -92,7 +135,10 @@ export function Renderer({
         context.drawImage(image.image, ...position(imageIndex, crop));
       };
 
-      const totalFrames = duration * frameRate;
+      const cycle_length = (images.length - 1) * 2;
+      const totalFramesBase = duration * frameRate;
+
+      const totalFrames = totalFramesBase + cycle_length - (totalFramesBase % cycle_length);
 
       // Create a new output file
       output.current = new Output({
@@ -100,21 +146,13 @@ export function Renderer({
         format: new Mp4OutputFormat(),
       });
 
-      // Retrieve the first video codec supported by this browser that can be contained in the output format
-      const videoCodec = await getFirstEncodableVideoCodec(
-        output.current.format.getSupportedVideoCodecs(),
-        {
-          width: canvas.width,
-          height: canvas.height,
-        }
-      );
-      if (!videoCodec) {
+      if (!codec) {
         throw new Error("Your browser doesn't support video encoding.");
       }
 
       // For video, we use a CanvasSource for convenience, as we're rendering to a canvas
       const canvasSource = new CanvasSource(canvas, {
-        codec: videoCodec,
+        codec,
         bitrate: QUALITY_HIGH,
       });
       output.current.addVideoTrack(canvasSource, { frameRate });
@@ -185,15 +223,22 @@ export function Renderer({
 
   return (
     <>
+      <Stack mx="xl" gap={0} mt="md">
+        <Text size="sm">Codec</Text>
+        <SegmentedControl
+          value={codec}
+          data={codecs}
+          onChange={(value: string) => setCodec(value as VideoCodec)}
+        />
+      </Stack>
       <Button
-        mt="md"
         onClick={() => void generateVideo()}
         disabled={isRendering}
         rightSection={<Loader size="sm" style={{ display: isRendering ? 'block' : 'none' }} />}
       >
         Generate Video
       </Button>
-      <Progress mt="md" value={progress * 100} transitionDuration={0} />
+      <Progress mt="sm" value={progress * 100} transitionDuration={0} />
       <Modal opened={!!videoSrc} onClose={() => setVideoSrc(null)} title="Wigglegram!" size="lg">
         <Center>
           <video
@@ -207,13 +252,23 @@ export function Renderer({
           />
         </Center>
         {description && <p>{description}</p>}
-        {'canShare' in navigator && images.length > 0 && (
+        {'canShare' in navigator && images.length > 0 ? (
           <Button
             leftSection={<IconDownload size={16} />}
             fullWidth
             onClick={async () => navigator.share(await shareData())}
           >
             Share / Save to Camera Roll
+          </Button>
+        ) : (
+          <Button
+            component="a"
+            leftSection={<IconDownload size={16} />}
+            fullWidth
+            href={videoSrc || undefined}
+            download
+          >
+            Download
           </Button>
         )}
       </Modal>

@@ -8,7 +8,6 @@ import { CoordSelectorGrid } from '@/components/CoordSelector/CoordSelector';
 import { ImageInput, WiggleImage } from '@/components/ImageInput/ImageInput';
 import { Renderer } from '@/components/Renderer/Renderer';
 import { StillRenderer } from '@/components/StillRenderer/StillRenderer';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
 import { Welcome } from '../components/Welcome/Welcome';
 
 export function HomePage() {
