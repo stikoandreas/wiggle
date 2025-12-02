@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconDownload } from '@tabler/icons-react';
 import {
@@ -68,6 +69,8 @@ export function Renderer({
   const [codec, setCodec] = useState<VideoCodec | undefined>(undefined);
   const [codecs, setCodecs] = useState<VideoCodec[]>([]);
 
+  const filename = `wigglegram_${dayjs().format('YYYY-MM-DD-HH-mm-ss')}_${frameRate}fps_${duration}s_${scale.toString().replace('.', '-')}x_${codec}.mp4`;
+
   useEffect(() => {
     async function getCodecs() {
       output.current = new Output({
@@ -91,7 +94,7 @@ export function Renderer({
       if (!videoCodecs || !firstCodec) {
         throw new Error("Your browser doesn't support video encoding.");
       }
-      setCodec(videoCodecs.includes('av1') ? 'av1' : firstCodec);
+      setCodec(firstCodec);
       setCodecs(videoCodecs);
     }
     getCodecs();
@@ -217,7 +220,7 @@ export function Renderer({
     const blob = await (await fetch(videoSrc)).blob();
 
     return {
-      files: [new File([blob], `wigglegram.mp4`, { type: 'video/mp4' })],
+      files: [new File([blob], filename, { type: 'video/mp4' })],
     };
   }, [videoSrc]);
 
@@ -252,25 +255,25 @@ export function Renderer({
           />
         </Center>
         {description && <p>{description}</p>}
-        {'canShare' in navigator && images.length > 0 ? (
+        {'canShare' in navigator && images.length > 0 && (
           <Button
             leftSection={<IconDownload size={16} />}
             fullWidth
             onClick={async () => navigator.share(await shareData())}
+            mb="sm"
           >
             Share / Save to Camera Roll
           </Button>
-        ) : (
-          <Button
-            component="a"
-            leftSection={<IconDownload size={16} />}
-            fullWidth
-            href={videoSrc || undefined}
-            download
-          >
-            Download
-          </Button>
         )}
+        <Button
+          component="a"
+          leftSection={<IconDownload size={16} />}
+          fullWidth
+          href={videoSrc || undefined}
+          download={filename}
+        >
+          Download
+        </Button>
       </Modal>
     </>
   );
