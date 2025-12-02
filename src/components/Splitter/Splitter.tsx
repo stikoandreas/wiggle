@@ -105,6 +105,7 @@ export function Splitter({ image }: { image: WiggleImage }) {
       <NumberInput
         label="Number of frames"
         value={splits}
+        min={2}
         onChange={(value: number | string) => setSplits(Number(value))}
       />
       <Space h="md" />
@@ -114,7 +115,7 @@ export function Splitter({ image }: { image: WiggleImage }) {
             image={image}
             threshold={debounced}
             onChange={setBreakPoints}
-            splits={splits}
+            splits={Math.max(splits, 2)}
           />
         </PrismaZoom>
       </Box>
