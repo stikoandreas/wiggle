@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconDownload } from '@tabler/icons-react';
 import {
@@ -67,6 +68,8 @@ export function Renderer({
 
   const [codec, setCodec] = useState<VideoCodec | undefined>(undefined);
   const [codecs, setCodecs] = useState<VideoCodec[]>([]);
+
+  const filename = `wigglegram_${dayjs().format('YYYY-MM-DD-HH-mm-ss')}_${frameRate}fps_${duration}s_${scale.toString().replace('.', '-')}x_${codec}.mp4`;
 
   useEffect(() => {
     async function getCodecs() {
@@ -217,7 +220,7 @@ export function Renderer({
     const blob = await (await fetch(videoSrc)).blob();
 
     return {
-      files: [new File([blob], `wigglegram.mp4`, { type: 'video/mp4' })],
+      files: [new File([blob], filename, { type: 'video/mp4' })],
     };
   }, [videoSrc]);
 
@@ -267,7 +270,7 @@ export function Renderer({
           leftSection={<IconDownload size={16} />}
           fullWidth
           href={videoSrc || undefined}
-          download
+          download={filename}
         >
           Download
         </Button>
