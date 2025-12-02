@@ -91,7 +91,7 @@ export function Renderer({
       if (!videoCodecs || !firstCodec) {
         throw new Error("Your browser doesn't support video encoding.");
       }
-      setCodec(videoCodecs.includes('av1') ? 'av1' : firstCodec);
+      setCodec(firstCodec);
       setCodecs(videoCodecs);
     }
     getCodecs();
@@ -252,25 +252,25 @@ export function Renderer({
           />
         </Center>
         {description && <p>{description}</p>}
-        {'canShare' in navigator && images.length > 0 ? (
+        {'canShare' in navigator && images.length > 0 && (
           <Button
             leftSection={<IconDownload size={16} />}
             fullWidth
             onClick={async () => navigator.share(await shareData())}
+            mb="sm"
           >
             Share / Save to Camera Roll
           </Button>
-        ) : (
-          <Button
-            component="a"
-            leftSection={<IconDownload size={16} />}
-            fullWidth
-            href={videoSrc || undefined}
-            download
-          >
-            Download
-          </Button>
         )}
+        <Button
+          component="a"
+          leftSection={<IconDownload size={16} />}
+          fullWidth
+          href={videoSrc || undefined}
+          download
+        >
+          Download
+        </Button>
       </Modal>
     </>
   );
