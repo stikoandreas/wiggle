@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
-import { Box, SimpleGrid, Slider } from '@mantine/core';
+import { Box, NumberInput, SimpleGrid, Slider, Space, Text, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { WiggleImage } from '../ImageInput/ImageInput';
 
@@ -98,15 +98,32 @@ export function Splitter({ image }: { image: WiggleImage }) {
 
   const [debounced] = useDebouncedValue(threshold, 200);
 
+  const [splits, setSplits] = useState<number>(4);
+
   return (
     <>
+      <NumberInput
+        label="Number of frames"
+        value={splits}
+        onChange={(value: number | string) => setSplits(Number(value))}
+      />
+      <Space h="md" />
       <Box style={{ overflow: 'hidden' }}>
         <PrismaZoom>
-          <SplitPreview image={image} threshold={debounced} onChange={setBreakPoints} />
+          <SplitPreview
+            image={image}
+            threshold={debounced}
+            onChange={setBreakPoints}
+            splits={splits}
+          />
         </PrismaZoom>
       </Box>
+      <Text size="sm">Tolerance</Text>
       <Slider min={1} max={255 / 2} value={threshold} onChange={setThreshold} />
-      <SimpleGrid cols={4} bg="white">
+      <Text size="sm">Adjust until all frames are cleanly separated.</Text>
+      <Space h="md" />
+      <Title order={3}>Detected frames</Title>
+      <SimpleGrid cols={4}>
         {breakPoints.map((breakPoint) => (
           <Preview image={image} breakPoint={breakPoint} />
         ))}
@@ -120,10 +137,12 @@ export const SplitPreview = memo(
     image,
     threshold,
     onChange,
+    splits,
   }: {
     image: WiggleImage;
     threshold: number;
     onChange: (breakPoint: [number, number][]) => void;
+    splits: number;
   }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -155,35 +174,33 @@ export const SplitPreview = memo(
       ctx.drawImage(image.image, 0, 0, canvas.width, canvas.height);
       const line = bitMap(canvas, ctx, threshold);
 
-      const first_border = linearScan(line, width / 4 - width / 8, width / 4 + width / 8);
-      const second_border = linearScan(
-        line,
-        (width / 4) * 2 - width / 8,
-        (width / 4) * 2 + width / 8
-      );
-      const third_border = linearScan(
-        line,
-        (width / 4) * 3 - width / 8,
-        (width / 4) * 3 + width / 8
-      );
+      const borders = new Array(splits - 1)
+        .fill(undefined)
+        .map((_, index) =>
+          linearScan(
+            line,
+            (width / splits) * (index + 1) - width / (splits * 2),
+            (width / splits) * (index + 1) + width / (splits * 2)
+          )
+        );
 
-      first_border && verticalLine(canvas, ctx, first_border, 'yellow');
-      second_border && verticalLine(canvas, ctx, second_border, 'yellow');
-      third_border && verticalLine(canvas, ctx, third_border, 'yellow');
+      borders.map((value) => value && verticalLine(canvas, ctx, value, 'yellow'));
 
-      if (first_border && second_border && third_border) {
-        onChange([
-          [0, first_border / scale_factor],
-          [first_border / scale_factor, second_border / scale_factor],
-          [second_border / scale_factor, third_border / scale_factor],
-          [third_border / scale_factor, canvas.width / scale_factor],
-        ]);
+      if (borders.every((value) => value !== undefined)) {
+        onChange(
+          new Array(splits)
+            .fill(undefined)
+            .map((_, index) => [
+              index === 0 ? 0 : borders[index - 1] / scale_factor,
+              index === splits - 1 ? width / scale_factor : borders[index] / scale_factor,
+            ])
+        );
       } else {
         onChange([]);
       }
 
       //binarize(canvas, ctx, threshold);
-    }, [image, threshold]);
+    }, [image, threshold, splits]);
 
     return <canvas ref={canvasRef} style={{ width: '100%', maxHeight: '80dvh' }} />;
   }
