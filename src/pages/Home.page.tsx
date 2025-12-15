@@ -44,7 +44,7 @@ export function HomePage() {
         </Container>
       ) : images.length === 1 ? (
         <Container mt="lg">
-          <Splitter image={images[0]} />
+          <Splitter image={images[0]} onChange={handleSetImages} />
         </Container>
       ) : (
         <>

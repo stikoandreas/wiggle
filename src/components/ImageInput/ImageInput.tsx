@@ -13,7 +13,7 @@ export type WiggleImage = {
   y?: number;
 };
 
-function loadImage(file: File): Promise<WiggleImage> {
+export function loadImage(file: File | Blob): Promise<WiggleImage> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     const src = URL.createObjectURL(file);

@@ -1,8 +1,35 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
-import { Box, NumberInput, SimpleGrid, Slider, Space, Text, Title } from '@mantine/core';
+import { Box, Button, NumberInput, SimpleGrid, Slider, Space, Text, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { WiggleImage } from '../ImageInput/ImageInput';
+import { loadImage, WiggleImage } from '../ImageInput/ImageInput';
+
+async function renderImage(image: WiggleImage, breakPoint: [number, number]) {
+  const canvas = new OffscreenCanvas(image.w, image.h);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  const width = breakPoint[1] - breakPoint[0];
+  const height = image.h;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Clear the canvas
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw each image at its specified coordinates
+  ctx.drawImage(image.image, breakPoint[0], 0, width, height, 0, 0, width, height);
+
+  const blob = await canvas.convertToBlob();
+
+  return loadImage(blob);
+}
 
 function getThresholdForCoord(
   data: ImageDataArray,
@@ -24,28 +51,11 @@ function getThresholdForLine(
 ) {
   let count = 0;
   for (let y = 0; y < height; y += 1) {
-    if (getThresholdForCoord(data, x, y, width, threshold)) count += 1;
-  }
-  return count / height > 0.05;
-}
-
-function binarize(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    if (data.slice(i, i + 3).some((pixel) => pixel > threshold)) {
-      data[i] = 255; // red
-      data[i + 1] = 255; // green
-      data[i + 2] = 0; // blue
-    } else {
-      data[i] = 0; // red
-      data[i + 1] = 0; // green
-      data[i + 2] = 0; // blue
-      data[i + 3] = 0; // alpha
+    if (getThresholdForCoord(data, x, y, width, threshold)) {
+      count += 1;
     }
   }
-  ctx.globalAlpha = 0.5;
-  ctx.putImageData(imageData, 0, 0);
+  return count / height > 0.05;
 }
 
 function bitMap(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, threshold: number) {
@@ -89,9 +99,13 @@ function linearScan(line: boolean[], from: number, to: number) {
   return found_something ? Math.round((min_x + max_x) / 2) : undefined;
 }
 
-export function Splitter({ image }: { image: WiggleImage }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
+export function Splitter({
+  image,
+  onChange,
+}: {
+  image: WiggleImage;
+  onChange: (images: WiggleImage[]) => void;
+}) {
   const [threshold, setThreshold] = useState<number>(25);
 
   const [breakPoints, setBreakPoints] = useState<[number, number][]>([]);
@@ -99,6 +113,15 @@ export function Splitter({ image }: { image: WiggleImage }) {
   const [debounced] = useDebouncedValue(threshold, 200);
 
   const [splits, setSplits] = useState<number>(4);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  function handleApply() {
+    setIsLoading(true);
+    Promise.all(breakPoints.map((breakPoint) => renderImage(image, breakPoint))).then((loaded) => {
+      onChange(loaded as WiggleImage[]);
+    });
+  }
 
   return (
     <>
@@ -129,6 +152,9 @@ export function Splitter({ image }: { image: WiggleImage }) {
           <Preview image={image} breakPoint={breakPoint} />
         ))}
       </SimpleGrid>
+      <Button fullWidth onClick={handleApply} loading={isLoading} mt="lg">
+        Apply
+      </Button>
     </>
   );
 }
