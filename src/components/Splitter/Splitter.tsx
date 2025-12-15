@@ -152,7 +152,13 @@ export function Splitter({
           <Preview image={image} breakPoint={breakPoint} />
         ))}
       </SimpleGrid>
-      <Button fullWidth onClick={handleApply} loading={isLoading} mt="lg">
+      <Button
+        fullWidth
+        onClick={handleApply}
+        loading={isLoading}
+        mt="lg"
+        disabled={breakPoints.length !== splits}
+      >
         Apply
       </Button>
     </>
